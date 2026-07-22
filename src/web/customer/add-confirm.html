@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -10,11 +11,60 @@
 <body>
     <div class="container mt-5">
         <!-- ここにHTMLを書く -->
+        <h2 class="mb-4">入力内容の確認</h2>
+        <dl class="row">
+            <dt class="col-sm-3">会社名</dt>
+            <dd class="col-sm-9" data-field="companyName"></dd>
+            <dt class="col-sm-3">業種</dt>
+            <dd class="col-sm-9" data-field="industry"></dd>
+            <dt class="col-sm-3">連絡先</dt>
+            <dd class="col-sm-9" data-field="contact"></dd>
+            <dt class="col-sm-3">所在地</dt>
+            <dd class="col-sm-9" data-field="location"></dd>
+        </dl>
+        <div id="result-message" class="alert alert-success d-none" role="alert"></div>
+        <button type="button" id="back-btn" class="btn btn-secondary">戻る</button>
+        <button type="button" id="register-btn" class="btn btn-primary">登録する</button>
     </div>
     <script type="module">
-        <!-- ここにJSを書く -->
+        // ここにJSを書く
+        import config from '../config.js';
+
+        const customerData = JSON.parse(sessionStorage.getItem('customerData') || 'null');
+        if (!customerData) {
+            location.href = 'add.html';
+        } else {
+            document.querySelectorAll('[data-field]').forEach(el => {
+                el.textContent = customerData[el.dataset.field] ?? '';
+            });
+        }
+
+        document.getElementById('back-btn').addEventListener('click', () => {
+            location.href = 'add.html';
+        });
+
+        document.getElementById('register-btn').addEventListener('click', () => {
+            fetch(config.apiUrl + '/add-customer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(customerData)
+            }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    sessionStorage.removeItem('customerData');
+                    document.getElementById('register-btn').disabled = true;
+                    const message = document.getElementById('result-message');
+                    message.textContent = '顧客情報が正常に保存されました。';
+                    message.classList.remove('d-none');
+                } else {
+                    alert('保存に失敗しました。');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
     </script>
-    <!-- BootstrapのJavaScriptの読み込み -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>

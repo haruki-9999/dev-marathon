@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Detail</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4">Customer Detail</h1>
+      
+      <!-- エラーメッセージ表示用の警告領域 -->
+      <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+
+      <table class="table table-bordered">
+        <tbody id="customer-detail-body">
+        </tbody>
+      </table>
+
+      <div class="d-flex justify-content-between mt-3">
+        <a href="list.html" class="btn btn-secondary">Back to List</a>
+
+        <div>
+          <button id="update-btn" class="btn btn-primary">更新する</button>
+          <button id="delete-btn" class="btn btn-danger">削除する</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import config from "../config.js";
+
+      function showError(message) {
+        const errDiv = document.getElementById("error-message");
+        if (errDiv) {
+          errDiv.textContent = message;
+          errDiv.classList.remove("d-none");
+        }
+      }
+
+      // 1. URLからパラメータ（?id=xxx）を取得
+      const urlParams = new URLSearchParams(window.location.search);
+      const customerId = urlParams.get('id');
+
+      const tbody = document.getElementById("customer-detail-body");
+
+      // 画面の項目定義
+      const columns = {
+        companyname: "会社名:",
+        industry: "業種:",
+        contact: "連絡先:",
+        location: "所在地:"
+      };
+
+      // テーブルの枠組みを生成
+      Object.keys(columns).forEach((key) => {
+        const row = tbody.insertRow();
+        const th = document.createElement("th");
+        const td = document.createElement("td");
+        const input = document.createElement("input");
+
+        th.textContent = columns[key];
+        th.style.width = "30%";
+
+        input.className = "form-control";
+        input.id = key;
+        input.value = "";
+
+        td.appendChild(input);
+        row.appendChild(th);
+        row.appendChild(td);
+      });
+
+      if (!customerId) {
+        alert("Customer ID が指定されていません。一覧画面からやり直してください。");
+        window.location.href = "list.html";
+      } else {
+        // 2. 顧客データの取得
+        fetch(`${config.apiUrl}/customers/${customerId}`)
+          .then(async (response) => {
+            if (!response.ok) {
+              const errJson = await response.json().catch(() => ({}));
+              throw new Error(errJson.message || `データ取得に失敗しました (HTTP Status: ${response.status})`);
+            }
+            return response.json();
+          })
+          .then((customer) => {
+            console.log("💡デバッグ用（詳細画面データ）:", customer);
+
+            // 3. 各 input 要素へ値を安全にセット
+            Object.keys(columns).forEach((key) => {
+              const inputEl = document.getElementById(key);
+              if (!inputEl) return;
+
+              let value = "";
+
+              if (key === "companyname") {
+                value = customer.companyname || customer.company_name || customer.companyName || customer.name;
+              } else if (key === "industry") {
+                value = customer.industry || customer.industryName || customer.industry_name || customer.business;
+              } else if (key === "contact") {
+                value = customer.contact || customer.Contact || customer.phone || customer.tel || customer.email;
+              } else if (key === "location") {
+                value = customer.address || customer.Address || customer.company_address || customer.location;
+              }
+
+              if (!value) {
+                value = customer[key] || customer[key.toLowerCase()] || customer[key.toUpperCase()] || "";
+              }
+
+              inputEl.value = value;
+            });
+          })
+          .catch((error) => {
+            console.error("データ取得エラー:", error);
+            showError(`データの読み込みに失敗しました: ${error.message}`);
+          });
+
+        // 4. 削除ボタンの処理
+        const deleteBtn = document.getElementById("delete-btn");
+        deleteBtn.addEventListener("click", () => {
+          if (!confirm("削除していいですか?")) return;
+
+          fetch(`${config.apiUrl}/customers/${customerId}`, {
+            method: 'DELETE'
+          })
+          .then(async (response) => {
+            if (!response.ok) {
+              const errJson = await response.json().catch(() => ({}));
+              throw new Error(errJson.message || `削除失敗 (HTTP Status: ${response.status})`);
+            }
+            alert("削除が完了しました。");
+            window.location.href = 'list.html';
+          })
+          .catch((error) => {
+            console.error("削除エラー:", error);
+            alert(`削除エラー: ${error.message}`);
+          });
+        });
+
+        // 5. 更新ボタンの処理
+        const updateBtn = document.getElementById("update-btn");
+        updateBtn.addEventListener("click", () => {
+          fetch(`${config.apiUrl}/customers/${customerId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              companyName: document.getElementById("companyname").value,
+              industry: document.getElementById("industry").value,
+              contact: document.getElementById("contact").value,
+              location: document.getElementById("location").value
+            })
+          })
+          .then(async (response) => {
+            if (!response.ok) {
+              const errJson = await response.json().catch(() => ({}));
+              throw new Error(errJson.message || `更新失敗 (HTTP Status: ${response.status})`);
+            }
+            return response.json().catch(() => ({}));
+          })
+          .then(() => {
+            alert("更新しました。");
+            window.location.href = "list.html";
+          })
+          .catch((error) => {
+            console.error("更新エラー:", error);
+            alert(`更新エラー: ${error.message}`);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

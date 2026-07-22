@@ -9,17 +9,19 @@ services:
       - ./work:/work
     working_dir: /usr/share/nginx/html
     tty: true # 開発時のみ有効
+  
 
   app:
     container_name: nodejs
     image: node:22-bullseye
     ports:
-      - "1985:1985"
+      - "5909:5909"
     volumes:
       - ./src/node:/app
       - ./work:/work
     working_dir: /app
     tty: true # 開発時のみ有効
+#    command: npm run dev
 
   db:
     container_name: postgres

@@ -24,31 +24,64 @@
       </table>
     </div>
 
+   
+  
     <script type="module">
       // ExpressサーバのAPIエンドポイントのURL
-      import config from "./config.js";
+      import config from "../config.js";
 
       fetch(`${config.apiUrl}/customers`)
-        .then((response) => {
-          console.log(response); // ここでレスポンスオブジェクトをログに出力
-          return response.json();
-        })
+        .then((response) => response.json())
         .then((data) => {
-          console.log(data); // ここで解析されたデータをログに出力
+          console.log("デバッグ用（APIから届いたデータ）:", data); // 💡うまくいかない時はF12のコンソールでこれを見てください
+          
           const list = document.getElementById("customer-list");
+          list.innerHTML = ""; // 一度中身を空にする
+
           data.forEach((customer, index) => {
             const row = list.insertRow();
             const cell1 = row.insertCell(0);
-            const cell2 = row.insertCell(1);
-            const cell3 = row.insertCell(2);
+            const cell2 = row.insertCell(1); // Company Name のセル
+            const cell3 = row.insertCell(2); // Contact のセル
+
+            // 1. 連番の表示
             cell1.textContent = index + 1;
-            cell2.textContent = customer.companyname;
-            cell3.textContent = customer.contact;
+
+            // 2. データのキー名（カラム名）がズレていても対応できるように全パターンをチェック
+            // 💡 会社名（一番最初に見つかった文字データを会社名として扱います）
+            const cName = customer.companyname || 
+                          customer.companyName || 
+                          customer.name || 
+                          customer.customer_name || 
+                          customer.contact || // もしContact列に入ってしまっているならそれを流用
+                          "不明な会社名";
+
+            // 💡 担当者名（Contact）
+            const cContact = customer.contact || customer.Contact || "-";
+            
+            // 💡 顧客ID
+            const cId = customer.id || customer.customer_id || customer.customerId || (index + 1);
+
+            // 3. 会社名をクリックできるaタグ（リンク）を作成
+            const link = document.createElement("a");
+            
+            // タップしたらパス定義に従って customer-detail.html にID付きで遷移
+            link.href = `detail.html?id=${cId}`; 
+            link.textContent = cName; // 「詳細を見る」ではなく、取得した会社名を入れる
+            
+            // 4. セルに作成したリンクを追加
+            cell2.appendChild(link);
+
+            // 5. Contact（担当者）の表示
+            cell3.textContent = cContact;
           });
         })
-        .catch((error) => console.error(error));
+        .catch((error) => console.error("一覧の取得エラー:", error));
     </script>
-
+    
+    </script>
+  </body>
+</html>
     <!-- BootstrapのJavaScriptと依存関係のリンク -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
