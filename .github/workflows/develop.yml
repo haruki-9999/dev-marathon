@@ -1,4 +1,4 @@
-name: ssh haruki2
+name: ssh haruki3
 on:
   push:
     branches:
