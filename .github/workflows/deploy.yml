@@ -11,11 +11,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Deploy to Server
+      - id: ssh
+        name: Deploy to Server
         uses: invi5H/ssh-action@v1
         with:
-          host: ${{ secrets.DEV_SSH_HOST }}
-          username: ${{ secrets.DEV_SSH_USER }}
-          key: ${{ secrets.DEV_SSH_KEY }}
-          command: |
-            cd /app/dev-marathon && bash deploy.sh
+          SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
+          SSH_USER: ${{ secrets.DEV_SSH_USER }}
+          SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
+
+      - name: Run deploy script
+        run: ssh ${{ steps.ssh.outputs.SERVER }} "cd /app/dev-marathon && bash deploy.sh"
