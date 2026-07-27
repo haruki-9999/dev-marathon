@@ -20,4 +20,4 @@ jobs:
           SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
 
       - name: Run deploy script
-        run: ssh ${{ steps.ssh.outputs.SERVER }} bash /app/h_katsushima/deploy.sh
+        run: ssh ${{ steps.ssh.outputs.SERVER }} bash /app/h_katsushima/deploy.sh h_katsushima
