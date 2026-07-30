@@ -17,7 +17,7 @@ jobs:
       - name: Deploy to Staging
         run: ssh ${{ steps.ssh.outputs.SERVER }} bash /app/h_katsushima/deploy.sh h_katsushima
       - name: Debug Cypress environment
-        run: ssh ${{ steps.ssh.outputs.SERVER }} "whoami && id && cd /ci && pwd && ls -la node_modules/ | head -10 && ls -la node_modules/.bin/ | head -10"
+        run: ssh ${{ steps.ssh.outputs.SERVER }} "ls -la /ci/node_modules/.bin/cypress; ls -la /ci/node_modules/cypress/package.json; env | grep -i path"
       - name: Run Cypress tests on Staging
         run: ssh ${{ steps.ssh.outputs.SERVER }} "cd /ci && npx cypress run --spec cypress/e2e/h_katsushima.cy.js"
 
