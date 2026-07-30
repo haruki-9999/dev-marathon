@@ -16,8 +16,10 @@ jobs:
           SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
       - name: Deploy to Staging
         run: ssh ${{ steps.ssh.outputs.SERVER }} bash /app/h_katsushima/deploy.sh h_katsushima
+      - name: Debug Cypress environment
+        run: ssh ${{ steps.ssh.outputs.SERVER }} "cd /ci && pwd && which npx && npx cypress --version && ls -la node_modules/.bin/cypress"
       - name: Run Cypress tests on Staging
-        run: ssh ${{ steps.ssh.outputs.SERVER }} "cd /ci && npx cypress run --headless --spec cypress/e2e/h_katsushima.cy.js"
+        run: ssh ${{ steps.ssh.outputs.SERVER }} "cd /ci && npx cypress run --spec cypress/e2e/h_katsushima.cy.js"
 
   production-deploy:
     needs: staging-deploy-and-test
