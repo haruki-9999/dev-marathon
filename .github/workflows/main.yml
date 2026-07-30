@@ -13,7 +13,7 @@ jobs:
           SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
           SSH_PORT: ${{ secrets.DEV_SSH_PORT }}
           SSH_USER: ${{ secrets.DEV_SSH_USER }}
-          SSH_KEY: ${{ secrets.DEV_SSHE_SSH_KEY }}
+          SSH_KEY: ${{ secrets.DEV_SHE_SSH_KEY }}
       - name: Deploy to Staging
         run: ssh ${{ steps.ssh.outputs.SERVER }} bash /app/h_katsushima/deploy.sh h_katsushima
       - name: Run Cypress tests on Staging
