@@ -17,7 +17,7 @@ jobs:
       - name: Deploy to Staging
         run: ssh ${{ steps.ssh.outputs.SERVER }} bash /app/h_katsushima/deploy.sh h_katsushima
       - name: Run Cypress tests on Staging
-        run: ssh ${{ steps.ssh.outputs.SERVER }} "cd /ci && npx cypress run --spec cypress/e2e/h_katsushima.cy.js"
+        run: ssh ${{ steps.ssh.outputs.SERVER }} "cd /ci && npx cypress run --headless --spec cypress/e2e/h_katsushima.cy.js"
 
   production-deploy:
     needs: staging-deploy-and-test
