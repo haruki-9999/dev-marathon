@@ -32,4 +32,5 @@ jobs:
           SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
       - name: Deploy to Production
         run: ssh ${{ steps.ssh.outputs.SERVER }} bash /app/h_katsushima/deploy.sh h_katsushima
-run: ssh ${{ steps.ssh.outputs.SERVER }} "cd /ci && npx cypress run --spec cypress/e2e/y_muto.cy.js"
+run: ssh ${{ steps.ssh.outputs.SERVER }} "cd /ci && npx cypress run --spec cypress/e2e/h_katsushima.cy.js"
+
